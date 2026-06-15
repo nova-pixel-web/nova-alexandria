@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Alexandria - Archivo Estudiantil</title>
+    
+    <!-- Tailwind CSS para estructura y diseño responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FUENTES GOOGLE (Cinzel para títulos elegantes, Montserrat para lectura) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            /* Paleta de colores exacta del mockup */
+            --bg-dark: #0a0418;
+            --neon-magenta: #ff007f;
+            --neon-cyan: #00f0ff;
+            --neon-purple: #8a2be2;
+            --neon-orange: #ff7300;
+            --gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: #E2E8F0;
+            overflow-x: hidden;
+            user-select: none; /* Evita selección de texto por error */
+        }
+
+        .serif-font { font-family: 'Cinzel', serif; }
+
+        /* ==============================================================
+           EFECTOS DE NEÓN FLUIDOS (FONDO)
+           ============================================================== */
+        .neon-blob-left {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            max-width: 800px;
+            max-height: 800px;
+            background: radial-gradient(circle, rgba(255,0,127,0.15) 0%, rgba(0,240,255,0.1) 40%, transparent 70%);
+            filter: blur(80px);
+            left: -20%;
+            top: -10%;
+            z-index: -1;
+            animation: float-left 20s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+
+        .neon-blob-right {
+            position: fixed;
+            width: 80vw;
+            height: 80vw;
+            max-width: 900px;
+            max-height: 900px;
+            background: radial-gradient(circle, rgba(255,115,0,0.12) 0%, rgba(138,43,226,0.15) 50%, transparent 70%);
+            filter: blur(100px);
+            right: -25%;
+            bottom: -10%;
+            z-index: -1;
+            animation: float-right 25s infinite ease-in-out alternate;
+            pointer-events: none;
+        }
+
+        @keyframes float-left {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 30px) scale(1.1); }
+        }
+
+        @keyframes float-right {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-60px, -40px) scale(1.15); }
+        }
+
+        /* ==============================================================
+           TARJETAS DE LIBROS (Brillo Neón Trasero al Hover)
+           ============================================================== */
+        .book-card-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .book-cover-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 3; /* Proporción exacta de un libro */
+            border-radius: 8px;
+            z-index: 2;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #ffffff; /* Fondo blanco tipo hoja */
+        }
+
+        .book-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* El brillo multicolor que aparece detrás de la tarjeta */
+        .book-card-container::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: 40px; /* Cubre solo la parte de la imagen */
+            background: linear-gradient(45deg, #ff007f, #ff7300, #8a2be2, #00f0ff);
+            background-size: 300%;
+            border-radius: 12px;
+            z-index: 1;
+            filter: blur(20px);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* Efectos al pasar el mouse (Hover) */
+        .book-card-container:hover::before {
+            opacity: 1;
+            animation: glowing 4s linear infinite;
+        }
+
+        .book-card-container:hover .book-cover-wrapper {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        .book-card-container:hover .book-title-text {
+            color: #ff007f;
+            text-shadow: 0 0 10px rgba(255,0,127,0.5);
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ==============================================================
+           UI Y SCROLLBAR
+           ============================================================== */
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.5); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #ff007f; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #8a2be2; }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+        }
+
+        .btn-search {
+            background: linear-gradient(90deg, #ff007f 0%, #8a2be2 100%);
+            background-size: 200% auto;
+            transition: 0.5s;
+        }
+        .btn-search:hover { background-position: right center; }
+
+        .hidden-sys { display: none !important; }
+    </style>
+</head>
+<body class="custom-scroll flex flex-col min-h-screen">
+
+    <!-- LUCES DE NEÓN DEL FONDO -->
+    <div class="neon-blob-left"></div>
+    <div class="neon-blob-right"></div>
+
+    <!-- CABECERA PRINCIPAL -->
+    <header class="w-full pt-8 pb-4 px-6 md:px-12 flex justify-between items-center z-20 relative">
+        <!-- Logo y Título (Clickeables 5 veces para Admin) -->
+        <div class="flex items-center gap-4 cursor-pointer group" onclick="window.handleSecretClick()">
+            <img src="logo.png" alt="Logo Nova Alexandria" class="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.5)] transition-transform group-hover:scale-105" onerror="this.src='https://placehold.co/100x100/0a0418/D4AF37?text=NA'">
+            <h1 class="serif-font text-2xl md:text-4xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#AA7C11] drop-shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+                Nova Alexandria
+            </h1>
+        </div>
+        
+        <nav>
+            <button onclick="window.openModal('modalHelp')" class="text-white/80 hover:text-[#D4AF37] text-lg tracking-wider font-medium transition-all hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] px-5 py-2 rounded-lg bg-white/5 border border-transparent hover:border-[#D4AF37]/30">
+                Ayuda
+            </button>
+        </nav>
+    </header>
+
+    <!-- CUERPO DE LA APLICACIÓN -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-6 md:px-12 flex flex-col items-center mt-6 z-10 relative">
+        
+        <!-- Texto de Bienvenida (Como en el mockup de la imagen generada) -->
+        <div class="text-center mb-10">
+            <h2 class="serif-font text-6xl md:text-[5.5rem] font-bold text-white mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] tracking-wide">
+                ¡Bienvenido!
+            </h2>
+            <p class="text-lg md:text-2xl text-white/90 font-light tracking-wide drop-shadow-md">
+                El archivo del pasado en la red del futuro
+            </p>
+        </div>
+
+        <!-- Barra de Búsqueda Estilo Píldora -->
+        <div class="w-full max-w-3xl mb-16 relative">
+            <div class="flex items-center bg-white rounded-full p-2 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+                <input type="text" id="searchInput" onkeyup="window.filterBooks()" placeholder="Busca tu libro..." class="w-full pl-8 py-3 md:py-4 text-gray-900 bg-transparent rounded-full focus:outline-none text-lg md:text-xl placeholder-gray-500 font-medium">
+                <button class="h-12 md:h-14 px-8 md:px-12 rounded-full btn-search text-white flex items-center justify-center shadow-lg transition-transform hover:scale-[1.03]">
+                    <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sección del Catálogo -->
+        <div class="w-full flex flex-col">
+            <div class="flex items-center gap-4 mb-10 border-b border-white/10 pb-4">
+                <h3 class="serif-font text-3xl md:text-4xl font-semibold text-white tracking-widest drop-shadow-md">Libros</h3>
+                <!-- Interruptor visual decorativo -->
+                <div class="w-16 h-8 bg-gradient-to-r from-[#ff007f] to-white/20 rounded-full p-1 border border-white/20 flex items-center shadow-inner">
+                    <div class="w-6 h-6 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                </div>
+            </div>
+
+            <!-- Grilla Dinámica de Libros -->
+            <div id="booksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-8 gap-y-12 pb-20 w-full">
+                <!-- Mensaje de carga -->
+                <div class="col-span-full text-center text-white/50 py-10 text-xl font-light tracking-widest">Conectando con Nova Alexandria...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PIE DE PÁGINA (Footer Exacto) -->
+    <footer class="w-full bg-[#05020c] border-t border-white/10 py-10 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center z-10 relative mt-auto gap-8">
+        <img src="imagen1.png" alt="Consolación" class="h-16 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" onerror="this.src='https://placehold.co/150x80/111/fff?text=Imagen+1'">
+        
+        <div class="text-center text-white/60 text-xs md:text-sm font-light tracking-wide max-w-3xl space-y-2">
+            <p><strong class="text-white/80">Uso exclusivo y reservado:</strong> Programa desarrollado con fines educativos únicamente para la U.E.P. "Nuestra Señora de la Consolación" – Maracay.</p>
+            <p>Desarrollado y diseñado por: Angelis Beltrán</p>
+            <p>Desarrollado por: José Infante, Marcos Cortez y Gabriel Zarza.</p>
+        </div>
+
+        <img src="imagen2.png" alt="Conectados" class="h-16 md:h-20 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]" onerror="this.src='https://placehold.co/150x80/111/fff?text=Imagen+2'">
+    </footer>
+
+
+    <!-- ==============================================================
+         SISTEMA DE MODALES (VENTANAS EMERGENTES)
+         ============================================================== -->
+
+    <!-- Modal 1: PETICIÓN DE CONTRASEÑA -->
+    <div id="modalPasswordPrompt" class="fixed inset-0 modal-overlay hidden-sys z-[60] flex items-center justify-center p-4">
+        <div class="bg-[#0b0518] border border-white/20 p-8 rounded-2xl w-full max-w-sm shadow-[0_0_60px_rgba(138,43,226,0.4)] relative">
+            <button onclick="window.closeModal('modalPasswordPrompt')" class="absolute top-4 right-4 text-white/50 hover:text-white text-2xl">&times;</button>
+            <h2 id="pwdPromptTitle" class="serif-font text-2xl text-[#D4AF37] mb-6 text-center font-bold tracking-widest">Seguridad</h2>
+            <p id="pwdPromptDesc" class="text-white/70 text-sm mb-6 text-center">Ingrese la contraseña para continuar.</p>
+            
+            <input type="password" id="pwdPromptInput" class="w-full bg-black/60 border border-white/20 rounded-lg p-4 text-white focus:border-[#D4AF37] focus:outline-none mb-6 text-center tracking-widest text-xl" placeholder="••••••••••••">
+            <button id="pwdPromptBtn" class="w-full py-4 btn-search rounded-lg text-white font-bold text-sm tracking-widest transition-transform hover:scale-105">VERIFICAR</button>
+        </div>
+    </div>
+
+    <!-- Modal 2: AVISOS DEL SISTEMA (Éxitos / Errores) -->
+    <div id="modalSysMsg" class="fixed inset-0 modal-overlay hidden-sys z-[70] flex items-center justify-center p-4">
+        <div id="sysMsgBox" class="bg-[#0b0518] border p-8 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+            <h2 id="sysMsgTitle" class="serif-font text-3xl font-bold mb-4">Aviso</h2>
+            <p id="sysMsgText" class="text-white/90 mb-8 text-base tracking-wide"></p>
+            <button onclick="window.closeModal('modalSysMsg')" class="px-10 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold tracking-widest transition-colors">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <!-- Modal 3: PANEL DE ADMINISTRADOR -->
+    <div id="modalAdminPanel" class="fixed inset-0 modal-overlay hidden-sys z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0b0518] border border-[#D4AF37]/50 p-8 md:p-10 rounded-3xl w-full max-w-5xl shadow-[0_0_100px_rgba(212,175,55,0.15)] relative flex flex-col lg:flex-row gap-12 max-h-[95vh] overflow-y-auto custom-scroll">
+            <button onclick="window.closeModal('modalAdminPanel')" class="absolute top-6 right-8 text-white/50 hover:text-[#D4AF37] text-4xl transition-colors">&times;</button>
+            
+            <!-- IZQUIERDA: AGREGAR UN NUEVO LIBRO -->
+            <div class="flex-1 lg:border-r border-white/10 lg:pr-12">
+                <h2 class="serif-font text-2xl md:text-3xl text-[#D4AF37] font-bold mb-8 flex items-center gap-3">
+                    <span class="text-4xl leading-none font-light">+</span> Agregar un nuevo libro
+                </h2>
+                
+                <form id="addBookForm" onsubmit="window.submitNewBook(event)" class="space-y-5">
+                    <!-- Subida de Portada -->
+                    <div class="bg-black/40 border border-white/10 p-4 rounded-xl flex items-center gap-5">
+                        <div id="coverPreviewBox" class="w-16 h-24 bg-white/5 border border-white/10 rounded flex items-center justify-center overflow-hidden shrink-0">
+                            <span class="text-white/30 text-[10px] text-center px-1 uppercase tracking-widest">Sin<br>Portada</span>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs text-white/60 uppercase tracking-widest mb-2 font-bold">Subir Portada (Imagen)</label>
+                            <input type="file" id="bCover" accept="image/*" onchange="window.previewCover(event)" class="w-full text-xs text-white/60 file:mr-4 file:py-2.5 file:px-5 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-[#D4AF37]/20 file:text-[#D4AF37] hover:file:bg-[#D4AF37]/30 transition-colors cursor-pointer">
+                        </div>
+                    </div>
+
+                    <input type="text" id="bTitle" required placeholder="Título del Libro" class="w-full bg-black/50 border border-white/10 rounded-lg p-4 text-white focus:border-[#D4AF37] focus:outline-none text-sm tracking-wide">
+                    <input type="text" id="bAuthor" required placeholder="Autor" class="w-full bg-black/50 border border-white/10 rounded-lg p-4 text-white focus:border-[#D4AF37] focus:outline-none text-sm tracking-wide">
+                    
+                    <select id="bFormat" onchange="window.toggleAdminFields()" class="w-full bg-black/50 border border-white/10 rounded-lg p-4 text-white focus:border-[#D4AF37] focus:outline-none text-sm tracking-wide appearance-none cursor-pointer">
+                        <option value="pdf" class="bg-[#0b0518]">PDF en Google Drive</option>
+                        <option value="fisico" class="bg-[#0b0518]">Libro Físico en Biblioteca</option>
+                    </select>
+
+                    <!-- Campos dinámicos -->
+                    <div id="fieldDrive" class="pt-2">
+                        <input type="url" id="bUrl" placeholder="Link Directo a Google Drive" class="w-full bg-black/50 border border-cyan-500/30 rounded-lg p-4 text-white focus:border-cyan-400 focus:outline-none text-sm tracking-wide">
+                    </div>
+                    <div id="fieldPhysical" class="hidden-sys pt-2">
+                        <input type="text" id="bLocation" placeholder="Ubicación exacta (Ej: Estante A, Pasillo 2)" class="w-full bg-black/50 border border-[#D4AF37]/30 rounded-lg p-4 text-white focus:border-[#D4AF37] focus:outline-none text-sm tracking-wide">
+                    </div>
+
+                    <button type="submit" class="w-full mt-6 py-4 btn-search rounded-xl text-white font-bold tracking-widest shadow-lg text-sm transition-transform hover:scale-[1.02]">AÑADIR AL CATÁLOGO</button>
+                </form>
+            </div>
+
+            <!-- DERECHA: CAMBIO DE CLAVE Y SALIDA -->
+            <div class="flex-1 flex flex-col justify-between mt-12 lg:mt-0">
+                <div>
+                    <h2 class="serif-font text-2xl text-white/90 font-bold mb-8">⚙️ Seguridad</h2>
+                    <form id="changePwdForm" onsubmit="window.updatePassword(event)" class="space-y-4 bg-white/5 p-8 rounded-2xl border border-white/10 shadow-inner">
+                        <h3 class="text-xs text-[#D4AF37] font-bold uppercase tracking-widest mb-6">Modificar Contraseña</h3>
+                        <input type="password" id="pwdOld" required placeholder="Contraseña Actual" class="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#D4AF37] focus:outline-none text-center tracking-widest">
+                        <input type="password" id="pwdNew" required placeholder="Nueva Contraseña" class="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#D4AF37] focus:outline-none text-center tracking-widest">
+                        <input type="password" id="pwdConfirm" required placeholder="Confirmar Nueva" class="w-full bg-black/60 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-[#D4AF37] focus:outline-none text-center tracking-widest">
+                        <button type="submit" class="w-full py-4 mt-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-xs font-bold tracking-widest transition-all">ACTUALIZAR CREDENCIALES</button>
+                    </form>
+                </div>
+
+                <div class="mt-10 pt-8 border-t border-white/10">
+                    <button onclick="window.closeModal('modalAdminPanel')" class="w-full py-5 bg-black/80 border border-white/10 hover:border-[#D4AF37] rounded-2xl text-white font-bold tracking-widest transition-all group flex items-center justify-center gap-4 shadow-xl">
+                        <span class="text-2xl group-hover:-translate-x-3 transition-transform text-[#D4AF37]">←</span>
+                        VOLVER AL CATÁLOGO
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: LECTURA DE LIBRO FÍSICO (Mostrando Portada en vez del emoji) -->
+    <div id="modalPhysicalBook" class="fixed inset-0 modal-overlay hidden-sys z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0b0518] border border-white/10 p-10 rounded-2xl w-full max-w-lg shadow-[0_0_80px_rgba(212,175,55,0.15)] text-center relative flex flex-col items-center">
+            <button onclick="window.closeModal('modalPhysicalBook')" class="absolute top-4 right-6 text-white/50 hover:text-white text-3xl transition-colors">&times;</button>
+            
+            <!-- Portada Dinámica del Libro -->
+            <div class="relative w-32 h-48 mb-6 rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/20 overflow-hidden">
+                <img id="physBookCover" src="" class="w-full h-full object-cover">
+            </div>
+            
+            <h2 id="physBookTitle" class="serif-font text-2xl md:text-3xl text-white font-bold mb-2 uppercase tracking-widest leading-tight">Título</h2>
+            <p id="physBookAuthor" class="text-white/50 italic mb-8 text-sm tracking-wide">Autor</p>
+            
+            <div class="bg-black/80 w-full p-6 rounded-xl border border-white/5 mb-8">
+                <p class="text-[10px] text-[#D4AF37] uppercase tracking-widest font-bold mb-3">UBICACIÓN EXACTA EN BIBLIOTECA</p>
+                <p id="physBookLocation" class="text-lg text-white font-medium"></p>
+            </div>
+            
+            <button onclick="window.closeModal('modalPhysicalBook')" class="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl text-white text-xs font-bold tracking-widest transition-all border border-white/10">CERRAR FICHA</button>
+        </div>
+    </div>
+
+    <!-- Modal 5: AYUDA AL USUARIO -->
+    <div id="modalHelp" class="fixed inset-0 modal-overlay hidden-sys z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0b0518] border border-white/10 p-8 md:p-12 rounded-3xl w-full max-w-2xl shadow-[0_0_80px_rgba(6,182,212,0.2)] relative max-h-[90vh] overflow-y-auto custom-scroll">
+            <button onclick="window.closeModal('modalHelp')" class="absolute top-6 right-8 text-white/50 hover:text-white text-4xl transition-colors">&times;</button>
+            <h2 class="serif-font text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-10 font-bold text-center drop-shadow-md">Guía Estudiantil</h2>
+            
+            <div class="space-y-6 text-white/80 text-sm md:text-base leading-relaxed">
+                <p class="text-center mb-8 text-white/90">Bienvenido a la biblioteca digital Nova Alexandria. Así es como funciona la plataforma:</p>
+                
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <h4 class="text-cyan-400 font-bold text-lg mb-3 flex items-center gap-3">🔍 Búsqueda Exacta</h4>
+                    <p>Utiliza la barra de búsqueda central escribiendo el título del libro o el nombre del autor. El catálogo se filtrará inmediatamente para mostrarte las coincidencias exactas en tiempo real.</p>
+                </div>
+
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <h4 class="text-[#ff007f] font-bold text-lg mb-3 flex items-center gap-3">📚 Acceso al Contenido</h4>
+                    <p>Al hacer clic sobre cualquier tarjeta de libro, el sistema identificará su formato. Si es un archivo digital (PDF en Drive), se abrirá directamente en una nueva pestaña. Si es un libro Físico, aparecerá su ficha indicándote en qué lugar exacto de la biblioteca del colegio debes buscarlo.</p>
+                </div>
+
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <h4 class="text-[#D4AF37] font-bold text-lg mb-3 flex items-center gap-3">🖱️ Exploración Visual</h4>
+                    <p>A medida que la colección crezca, usa la barra de desplazamiento (scroll) para bajar y descubrir nuevas obras. Pasa el ratón por encima de los libros para iluminarlos y resaltar sus detalles en la interfaz.</p>
+                </div>
+            </div>
+            <button onclick="window.closeModal('modalHelp')" class="w-full mt-10 py-4 bg-white/5 hover:bg-white/10 rounded-xl text-white font-bold tracking-widest transition-colors">CERRAR GUÍA</button>
+        </div>
+    </div>
+
+    <!-- ==========================================================
+         LÓGICA JAVASCRIPT Y CONEXIÓN A FIREBASE
+         ========================================================== -->
+    <script type="module">
+        // Importaciones de Firebase 10.7.1
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // TUS CREDENCIALES EXACTAS DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5TCvn03qiG_EyKyqpZ_CAU0_9ZoLepRo",
+            authDomain: "nova-alexandria.firebaseapp.com",
+            projectId: "nova-alexandria",
+            storageBucket: "nova-alexandria.firebasestorage.app",
+            messagingSenderId: "183409979505",
+            appId: "1:183409979505:web:db60a202f35db219302bd0",
+            measurementId: "G-T66QLJ0EC5"
+        };
+
+        // Inicialización
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const librosRef = collection(db, "libros");
+        const configRef = doc(db, "config", "seguridad");
+
+        // Variables de estado
+        let loadedBooks = [];
+        let currentCoverBase64 = null;
+        let secretClicks = 0;
+        let clickTimer;
+        let currentAuthAction = null; 
+
+        // --- FUNCIONES VISUALES BÁSICAS ---
+        window.openModal = (id) => document.getElementById(id).classList.remove('hidden-sys');
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.add('hidden-sys');
+            if(id === 'modalPasswordPrompt') document.getElementById('pwdPromptInput').value = '';
+        };
+
+        window.systemAlert = (title, text, type = 'success') => {
+            document.getElementById('sysMsgTitle').innerText = title;
+            document.getElementById('sysMsgText').innerText = text;
+            const box = document.getElementById('sysMsgBox');
+            
+            if (type === 'error') {
+                document.getElementById('sysMsgTitle').className = "serif-font text-3xl font-bold mb-4 text-red-500 tracking-widest";
+                box.className = "bg-[#0b0518] border border-red-500/50 p-8 rounded-2xl w-full max-w-sm text-center shadow-[0_0_60px_rgba(239,68,68,0.3)]";
+            } else {
+                document.getElementById('sysMsgTitle').className = "serif-font text-3xl font-bold mb-4 text-green-400 tracking-widest";
+                box.className = "bg-[#0b0518] border border-green-500/50 p-8 rounded-2xl w-full max-w-sm text-center shadow-[0_0_60px_rgba(34,197,94,0.3)]";
+            }
+            window.openModal('modalSysMsg');
+        };
+
+        // --- OBTENER CONTRASEÑA MAESTRA ---
+        async function getMasterPassword() {
+            try {
+                const snap = await getDoc(configRef);
+                if (snap.exists() && snap.data().pwd) return snap.data().pwd;
+            } catch(e) { console.error("Error al obtener contraseña", e); }
+            return "alejandria.202606"; // Contraseña predeterminada solicitada
+        }
+
+        // --- SISTEMA DE CLICS SECRETOS PARA ADMIN ---
+        window.handleSecretClick = () => {
+            secretClicks++;
+            clearTimeout(clickTimer);
+            if (secretClicks >= 5) {
+                secretClicks = 0;
+                window.promptPassword('admin');
+            } else {
+                clickTimer = setTimeout(() => secretClicks = 0, 1500);
+            }
+        };
+
+        window.promptPassword = (action) => {
+            currentAuthAction = action;
+            document.getElementById('pwdPromptInput').value = '';
+            
+            if (action === 'admin') {
+                document.getElementById('pwdPromptTitle').innerText = "Acceso Administrativo";
+                document.getElementById('pwdPromptTitle').className = "serif-font text-2xl text-[#D4AF37] mb-6 text-center font-bold tracking-widest";
+            } else {
+                document.getElementById('pwdPromptTitle').innerText = "Autorizar Eliminación";
+                document.getElementById('pwdPromptTitle').className = "serif-font text-2xl text-red-500 mb-6 text-center font-bold tracking-widest";
+            }
+            
+            document.getElementById('pwdPromptBtn').onclick = window.executeAuthAction;
+            window.openModal('modalPasswordPrompt');
+        };
+
+        window.executeAuthAction = async () => {
+            const userInput = document.getElementById('pwdPromptInput').value;
+            window.closeModal('modalPasswordPrompt');
+            const realPassword = await getMasterPassword();
+
+            if (userInput === realPassword) {
+                if (currentAuthAction === 'admin') {
+                    window.openModal('modalAdminPanel');
+                } else if (currentAuthAction.startsWith('delete_')) {
+                    const bookId = currentAuthAction.replace('delete_', '');
+                    await deleteDoc(doc(db, "libros", bookId));
+                    window.systemAlert("Eliminación exitosa", "El libro fue eliminado permanentemente del catálogo.", "success");
+                }
+            } else {
+                window.systemAlert(currentAuthAction === 'admin' ? "Acceso denegado" : "Eliminación denegada", "La contraseña ingresada es incorrecta.", "error");
+            }
+        };
+
+        // --- CARGA Y RENDERIZADO DE LIBROS DESDE LA NUBE ---
+        onSnapshot(librosRef, (snapshot) => {
+            loadedBooks = [];
+            snapshot.forEach((doc) => loadedBooks.push({ id: doc.id, ...doc.data() }));
+            // Ordenar: Los más recientes primero
+            loadedBooks.sort((a, b) => b.fecha - a.fecha);
+            window.filterBooks();
+        });
+
+        // Filtrar y dibujar las tarjetas
+        window.filterBooks = () => {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('booksGrid');
+            grid.innerHTML = '';
+
+            const filtered = loadedBooks.filter(b => b.titulo.toLowerCase().includes(query) || b.autor.toLowerCase().includes(query));
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-white/40 py-16 text-xl tracking-widest">No hay libros en el catálogo.</div>`;
+                return;
+            }
+
+            filtered.forEach(book => {
+                const isPDF = book.formato === 'pdf';
+                const tagClass = isPDF ? 'text-cyan-400 bg-cyan-400/10 border-cyan-400/30' : 'text-[#D4AF37] bg-[#D4AF37]/10 border-[#D4AF37]/30';
+                const tagText = isPDF ? 'PDF DRIVE' : 'FÍSICO';
+                
+                const cardWrap = document.createElement('div');
+                cardWrap.className = "book-card-container cursor-pointer group";
+                
+                // Evento Clic Izquierdo (Leer / Abrir Info)
+                cardWrap.onclick = () => {
+                    if(isPDF) {
+                        window.open(book.enlace, '_blank');
+                    } else {
+                        // Mostrar portada real en el modal
+                        document.getElementById('physBookCover').src = book.portada || 'https://placehold.co/200x300/0a0418/white?text=Sin+Portada';
+                        document.getElementById('physBookTitle').innerText = book.titulo;
+                        document.getElementById('physBookAuthor').innerText = book.autor;
+                        document.getElementById('physBookLocation').innerText = book.enlace;
+                        window.openModal('modalPhysicalBook');
+                    }
+                };
+
+                // Evento Clic Derecho (Eliminar)
+                cardWrap.oncontextmenu = (e) => {
+                    e.preventDefault(); // Bloquear menú de Windows
+                    window.promptPassword(`delete_${book.id}`);
+                };
+
+                const imgHtml = book.portada 
+                    ? `<img src="${book.portada}" class="book-cover-img" alt="${book.titulo}">` 
+                    : `<div class="w-full h-full bg-black/60 flex items-center justify-center rounded-lg border border-white/10"><span class="text-white/20 text-3xl">📚</span></div>`;
+
+                cardWrap.innerHTML = `
+                    <div class="book-cover-wrapper shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
+                        ${imgHtml}
+                    </div>
+                    <div class="mt-4 text-center w-full px-1">
+                        <span class="inline-block text-[8px] md:text-[9px] font-bold tracking-widest border px-2 py-1 rounded uppercase mb-2 ${tagClass}">${tagText}</span>
+                        <h4 class="text-white font-bold text-sm md:text-base tracking-wide leading-tight line-clamp-2 book-title-text transition-colors">${book.titulo}</h4>
+                        <p class="text-white/40 text-[10px] md:text-xs uppercase tracking-widest mt-1 truncate">${book.autor}</p>
+                    </div>
+                `;
+                grid.appendChild(cardWrap);
+            });
+        };
+
+        // --- COMPRESIÓN DE PORTADAS (Optimización) ---
+        window.previewCover = (event) => {
+            const file = event.target.files[0];
+            const previewBox = document.getElementById('coverPreviewBox');
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_HEIGHT = 600; 
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Comprimir a JPEG calidad 80% para guardar en base de datos sin pesar mucho
+                    currentCoverBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    previewBox.innerHTML = `<img src="${currentCoverBase64}" class="w-full h-full object-cover rounded border border-white/20">`;
+                };
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // --- LÓGICA DE FORMULARIO DEL ADMIN PANEL ---
+        window.toggleAdminFields = () => {
+            const isPDF = document.getElementById('bFormat').value === 'pdf';
+            document.getElementById('fieldDrive').classList.toggle('hidden-sys', !isPDF);
+            document.getElementById('fieldPhysical').classList.toggle('hidden-sys', isPDF);
+            document.getElementById('bUrl').required = isPDF;
+            document.getElementById('bLocation').required = !isPDF;
+        };
+
+        window.submitNewBook = async (e) => {
+            e.preventDefault();
+            const format = document.getElementById('bFormat').value;
+            const newBook = {
+                titulo: document.getElementById('bTitle').value.trim(),
+                autor: document.getElementById('bAuthor').value.trim(),
+                formato: format,
+                enlace: format === 'pdf' ? document.getElementById('bUrl').value.trim() : document.getElementById('bLocation').value.trim(),
+                portada: currentCoverBase64,
+                fecha: Date.now()
+            };
+
+            await addDoc(librosRef, newBook);
+            
+            // Resetear
+            document.getElementById('addBookForm').reset();
+            currentCoverBase64 = null;
+            document.getElementById('coverPreviewBox').innerHTML = `<span class="text-white/30 text-[10px] text-center px-1 uppercase tracking-widest">Sin<br>Portada</span>`;
+            window.toggleAdminFields();
+            window.systemAlert("Operación Exitosa", `La obra ha sido añadida al catálogo permanentemente.`, "success");
+        };
+
+        // --- ACTUALIZAR CONTRASEÑA ---
+        window.updatePassword = async (e) => {
+            e.preventDefault();
+            const oldP = document.getElementById('pwdOld').value;
+            const newP = document.getElementById('pwdNew').value;
+            const confirmP = document.getElementById('pwdConfirm').value;
+
+            const realPassword = await getMasterPassword();
+
+            if (oldP !== realPassword) { window.systemAlert("Error", "La contraseña actual no coincide.", "error"); return; }
+            if (newP !== confirmP) { window.systemAlert("Error", "Las nuevas contraseñas no coinciden.", "error"); return; }
+            if (newP.trim() === '') { window.systemAlert("Error", "La contraseña no puede estar vacía.", "error"); return; }
+
+            await setDoc(configRef, { pwd: newP });
+            document.getElementById('changePwdForm').reset();
+            window.systemAlert("Actualización Exitosa", "La clave administrativa ha sido modificada y guardada en la nube.", "success");
+        };
+    </script>
+</body>
+</html>
